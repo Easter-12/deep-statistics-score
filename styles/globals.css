@@ -1,16 +1,189 @@
-html,
+/* Define a color palette for the app */
+:root {
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --primary-text-color: #e0e0e0;
+  --secondary-text-color: #b0b0b0;
+  --accent-color: #007bff;
+  --accent-hover-color: #0056b3;
+  --error-color: #cf6679;
+  --success-color: #66bb6a;
+  --border-color: #333333;
+}
+
+/* Apply base styles to the whole page */
 body {
-  padding: 0;
+  background-color: var(--background-color);
+  color: var(--primary-text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  padding: 20px;
 }
 
 a {
-  color: inherit;
+  color: var(--accent-color);
   text-decoration: none;
 }
 
-* {
-  box-sizing: border-box;
+/* Main container for the app content */
+.container {
+  max-width: 800px;
+  margin: auto;
+}
+
+/* Header styles */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 15px;
+}
+.user-info {
+  background-color: var(--card-background);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+/* Card styles for all main sections */
+.card {
+  background-color: var(--card-background);
+  padding: 25px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-top: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.card h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* Form and Input styles */
+input[type="text"], input[type="password"] {
+  background-color: #2c2c2c;
+  color: var(--primary-text-color);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+input[type="text"]:focus, input[type="password"]:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+/* Button styles */
+button {
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+button:hover {
+  transform: translateY(-1px);
+}
+button:disabled {
+  background-color: #444;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Specific button styles */
+.primary-button {
+  background-color: var(--accent-color);
+  color: white;
+}
+.primary-button:hover:not(:disabled) {
+  background-color: var(--accent-hover-color);
+}
+.secondary-button {
+  background-color: #333;
+  color: var(--primary-text-color);
+}
+.secondary-button:hover:not(:disabled) {
+  background-color: #444;
+}
+.sign-out-button {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--secondary-text-color);
+}
+.sign-out-button:hover {
+  background-color: var(--card-background);
+  border-color: #555;
+}
+
+/* Prediction form styles */
+.prediction-form {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.prediction-form input {
+  flex-grow: 1;
+}
+
+/* Message styles */
+.error-message {
+  color: var(--error-color);
+  margin-top: 15px;
+  font-weight: bold;
+}
+.success-message {
+  color: var(--success-color);
+  margin-top: 10px;
+}
+.loading-message {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 1.1rem;
+  color: var(--secondary-text-color);
+}
+
+/* Prediction results styling */
+.prediction-card {
+  background: #2a2a2a;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.prediction-card h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: var(--primary-text-color);
+}
+.prediction-card p {
+    margin: 4px 0 0;
+    color: var(--secondary-text-color);
+}
+.prediction-card p strong {
+    color: var(--primary-text-color);
+}
+
+/* Footer styling */
+.app-footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  border-top: 1px solid var(--border-color);
+  color: var(--secondary-text-color);
+}
+.social-links a {
+  font-size: 2rem;
+  margin: 0 15px;
+  color: var(--secondary-text-color);
+  transition: color 0.2s ease;
+}
+.social-links a:hover {
+  color: var(--accent-color);
 }
