@@ -87,7 +87,7 @@ const Home = () => {
   };
 
   async function signInWithGoogle() {
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://7817528c-38fb-4859-92b9-2e40a11799cb-00-37h8a75ucjznk.kirk.replit.dev/' } });
+    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://deep-statistics-score.vercel.app/' } });
   }
 
   // Login page uses new styles
