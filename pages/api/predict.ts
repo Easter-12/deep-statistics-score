@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
-import { tavily } from '@tavily/core'; // Correct import
+import { tavily } from '@tavily/core';
 import Groq from 'groq-sdk';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -26,20 +26,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const searchContext = await tavilyClient.search(`Detailed stats, recent form, H2H, and injury news for the soccer match between ${teamA} and ${teamB}`, { maxResults: 10 });
         const compiledStats = searchContext.results.map(r => r.content).join('\n\n---\n\n');
 
-        // --- THE FIX IS HERE ---
+        // --- THE NEW, SMARTER PROMPT ---
         const chatCompletion = await groq.chat.completions.create({
             messages: [{
                 role: 'user',
-                content: `You are an expert sports data analyst, "Deep Statistics Score". Analyze the provided data for the match between ${teamA} and ${teamB}. Data: --- ${compiledStats} --- Based ONLY on this data, provide your response as a single, raw JSON object and nothing else. Do not use markdown like \`\`\`json. Your response must contain these 8 keys: "fullTimeWinner", "halfTimeWinner", "overUnderGoals", "correctScoreSuggestion", "bothTeamsToScore", "doubleChance", "handicapResult", "keyInsights". Each key's value must be an object with "prediction" and either "probability" or "reasoning".`
+                content: `You are an expert sports data analyst, "Deep Statistics Score". Your most important task is to provide a set of predictions that are all **logically consistent** with each other.
+
+                Analyze the provided data for the match between ${teamA} and ${teamB}.
+                Data:
+                ---
+                ${compiledStats}
+                ---
+
+                Based on the data, first decide on a single, core prediction (e.g., "${teamA} to win 2-1"). Then, ensure all 8 of your output predictions support that single narrative. For example, if you predict a 2-1 score, "Both Teams To Score" must be "Yes" and "Over/Under Goals" should likely be "Over 2.5".
+
+                Provide your response as a single, raw JSON object and nothing else. Do not use markdown like \`\`\`json.
+
+                Your response must contain these 8 keys: "fullTimeWinner", "halfTimeWinner", "overUnderGoals", "correctScoreSuggestion", "bothTeamsToScore", "doubleChance", "handicapResult", "keyInsights". The "keyInsights" should summarize the core reasoning for your consistent set of predictions.`
             }],
             model: 'llama3-8b-8192',
-            // We REMOVED the strict 'response_format' that was causing the error.
         });
 
         const responseText = chatCompletion.choices[0]?.message?.content;
         if (!responseText) throw new Error("The AI returned an empty response.");
 
-        // This robustly finds the JSON within the AI's text response.
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("Could not find JSON in the AI response.");
 
