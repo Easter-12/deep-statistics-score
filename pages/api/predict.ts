@@ -26,23 +26,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const searchContext = await tavilyClient.search(`Detailed stats, recent form, H2H, and injury news for the soccer match between ${teamA} and ${teamB}`, { maxResults: 10 });
         const compiledStats = searchContext.results.map(r => r.content).join('\n\n---\n\n');
 
-        // --- THE NEW, SMARTER PROMPT ---
+        // --- THE MOST EXPLICIT PROMPT YET ---
         const chatCompletion = await groq.chat.completions.create({
             messages: [{
                 role: 'user',
-                content: `You are an expert sports data analyst, "Deep Statistics Score". Your most important task is to provide a set of predictions that are all **logically consistent** with each other.
+                content: `You are a data formatting machine. Your only job is to return a single, raw JSON object based on the provided data.
 
-                Analyze the provided data for the match between ${teamA} and ${teamB}.
-                Data:
+                Data for the match between ${teamA} and ${teamB}:
                 ---
                 ${compiledStats}
                 ---
 
-                Based on the data, first decide on a single, core prediction (e.g., "${teamA} to win 2-1"). Then, ensure all 8 of your output predictions support that single narrative. For example, if you predict a 2-1 score, "Both Teams To Score" must be "Yes" and "Over/Under Goals" should likely be "Over 2.5".
+                You MUST return a JSON object with exactly 8 keys. Each key's value must be another object containing specific keys as shown in this example.
 
-                Provide your response as a single, raw JSON object and nothing else. Do not use markdown like \`\`\`json.
+                THIS IS THE EXACT STRUCTURE YOU MUST FOLLOW:
+                {
+                  "fullTimeWinner": { "prediction": "string", "probability": "string (e.g., '55%')" },
+                  "halfTimeWinner": { "prediction": "string", "probability": "string (e.g., '40%')" },
+                  "overUnderGoals": { "prediction": "string (e.g., 'Over 2.5 Goals')", "probability": "string (e.g., '60%')" },
+                  "correctScoreSuggestion": { "prediction": "string (e.g., '2-1')", "probability": "string (e.g., '15%')" },
+                  "bothTeamsToScore": { "prediction": "string (Yes or No)", "probability": "string (e.g., '70%')" },
+                  "doubleChance": { "prediction": "string (e.g., '${teamA} or Draw')", "probability": "string (e.g., '80%')" },
+                  "handicapResult": { "prediction": "string (e.g., '${teamA} (-1)')", "reasoning": "string (Briefly explain why)" },
+                  "keyInsights": { "prediction": "string (e.g., 'A specific player to score')", "reasoning": "string (Briefly explain the main insight)" }
+                }
 
-                Your response must contain these 8 keys: "fullTimeWinner", "halfTimeWinner", "overUnderGoals", "correctScoreSuggestion", "bothTeamsToScore", "doubleChance", "handicapResult", "keyInsights". The "keyInsights" should summarize the core reasoning for your consistent set of predictions.`
+                Do not include any other text, explanations, or markdown formatting like \`\`\`json. Just the raw JSON object.`
             }],
             model: 'llama3-8b-8192',
         });
