@@ -187,3 +187,29 @@ button:disabled {
 .social-links a:hover {
   color: var(--accent-color);
 }
+/* --- RESPONSIVE STYLES FOR MOBILE --- */
+/* This applies to all screens 768px wide or smaller */
+@media (max-width: 768px) {
+  body {
+    padding: 10px; /* Reduce padding on small screens */
+  }
+
+  /* Stack the header items vertically */
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  /* Stack the prediction form items vertically */
+  .prediction-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Stack the upgrade form items vertically */
+  .upgrade-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

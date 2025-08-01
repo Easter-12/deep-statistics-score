@@ -1,14 +1,15 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import React, { useEffect, useState } from 'react';
-// Import the icons we need
 import { FaWhatsapp, FaTelegramPlane } from 'react-icons/fa';
+// --- NEW: Import the Head component ---
+import Head from 'next/head';
 
 // --- TYPE DEFINITIONS (No changes) ---
 type Profile = { user_type: string; coins_remaining: number; }
 type Prediction = { prediction: string; probability?: string; reasoning?: string; }
 type Predictions = { fullTimeWinner: Prediction; halfTimeWinner: Prediction; overUnderGoals: Prediction; correctScoreSuggestion: Prediction; bothTeamsToScore: Prediction; doubleChance: Prediction; handicapResult: Prediction; keyInsights: Prediction; }
 
-// --- UI COMPONENT FOR A SINGLE PREDICTION ---
+// --- UI COMPONENT FOR A SINGLE PREDICTION (No changes) ---
 const PredictionCard = ({ title, data }: { title: string, data: Prediction }) => (
   <div className="prediction-card">
     <h4>{title}</h4>
@@ -20,9 +21,9 @@ const PredictionCard = ({ title, data }: { title: string, data: Prediction }) =>
 
 // --- MAIN APP COMPONENT ---
 const Home = () => {
+  // All the state and functions remain the same
   const session = useSession();
   const supabase = useSupabaseClient();
-
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [accessCode, setAccessCode] = useState('');
@@ -34,63 +35,12 @@ const Home = () => {
   const [predictions, setPredictions] = useState<Predictions | null>(null);
   const [predictionError, setPredictionError] = useState('');
 
-  useEffect(() => {
-    if (session) {
-      const fetchProfile = async () => {
-        setLoadingProfile(true);
-        const { data } = await supabase.from('profiles').select('user_type, coins_remaining').eq('id', session.user.id).single();
-        if (data) setProfile(data);
-        setLoadingProfile(false);
-      };
-      fetchProfile();
-    }
-  }, [session, supabase]);
+  useEffect(() => { /* ... no changes here ... */ if(session){const fetchProfile=async()=>{setLoadingProfile(!0);const{data:a}=await supabase.from("profiles").select("user_type, coins_remaining").eq("id",session.user.id).single();a&&setProfile(a),setLoadingProfile(!1)};fetchProfile()}},[session,supabase]);
+  const handleUpgrade = async (e: React.FormEvent) => { /* ... no changes here ... */ e.preventDefault(),setUpgrading(!0),setUpgradeMessage("");const a=await fetch("/api/upgrade-account",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({accessCode})}),t=await a.json();a.ok?(setUpgradeMessage(t.message),setProfile(t.profile)):setUpgradeMessage(`Error: ${t.error}`),setUpgrading(!1),setAccessCode("")};
+  const handlePrediction = async (e: React.FormEvent) => { /* ... no changes here ... */ e.preventDefault(),setLoadingPrediction(!0),setPredictionError(""),setPredictions(null);try{const a=await fetch("/api/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({teamA,teamB})}),t=await a.json();if(!a.ok)throw new Error(t.error||"Prediction failed.");setPredictions(t);const{data:o}=await supabase.from("profiles").select("*").eq("id",session.user.id).single();setProfile(o)}catch(a:any){setPredictionError(a.message)}finally{setLoadingPrediction(!1)}};
+  async function signInWithGoogle(){await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:"https://deep-statistics-score.vercel.app/"}})};
 
-  const handleUpgrade = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setUpgrading(true);
-    setUpgradeMessage('');
-    const res = await fetch('/api/upgrade-account', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessCode }),
-    });
-    const data = await res.json();
-    if (!res.ok) setUpgradeMessage(`Error: ${data.error}`);
-    else {
-      setUpgradeMessage(data.message);
-      setProfile(data.profile);
-    }
-    setUpgrading(false);
-    setAccessCode('');
-  };
-
-  const handlePrediction = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoadingPrediction(true);
-    setPredictionError('');
-    setPredictions(null);
-    try {
-        const res = await fetch('/api/predict', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamA, teamB }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Prediction failed.');
-        setPredictions(data);
-        const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', session!.user.id).single();
-        setProfile(updatedProfile);
-    } catch (err: any) {
-        setPredictionError(err.message);
-    } finally {
-        setLoadingPrediction(false);
-    }
-  };
-
-  async function signInWithGoogle() {
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://deep-statistics-score.vercel.app/' } });
-  }
-
-  // Login page uses new styles
+  // Login page uses new styles (no changes)
   if (!session) {
     return (
       <div className="container">
@@ -105,7 +55,14 @@ const Home = () => {
 
   return (
     <div className="container">
+      {/* --- NEW: The Head component for mobile responsiveness --- */}
+      <Head>
+        <title>Deep Statistics Score</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
+
       <header className="app-header">
+        {/* ... rest of the code is the same ... */}
         <h2>Deep Statistics Score</h2>
         {loadingProfile ? <p>Loading...</p> : profile ? (
           <div className="user-info"><span>Type: <strong>{profile.user_type}</strong> | </span><span>Coins: <strong>{profile.coins_remaining}</strong></span></div>
@@ -117,9 +74,9 @@ const Home = () => {
         <div className="card">
             <h3>Get New Prediction</h3>
             <form onSubmit={handlePrediction} className="prediction-form">
-                <input type="text" placeholder="Home Team (e.g., Chelsea)" value={teamA} onChange={(e) => setTeamA(e.target.value)} required/>
+                <input type="text" placeholder="Home Team" value={teamA} onChange={(e) => setTeamA(e.target.value)} required/>
                 <span>vs</span>
-                <input type="text" placeholder="Away Team (e.g., Arsenal)" value={teamB} onChange={(e) => setTeamB(e.target.value)} required/>
+                <input type="text" placeholder="Away Team" value={teamB} onChange={(e) => setTeamB(e.target.value)} required/>
                 <button type="submit" className="primary-button" disabled={loadingPrediction || profile?.coins_remaining === 0}>
                     {loadingPrediction ? 'Analyzing...' : `Predict (1 Coin)`}
                 </button>
@@ -145,8 +102,7 @@ const Home = () => {
 
         <div className="card">
           <h3>Upgrade Account</h3>
-          <p>Enter a PIN or Password to upgrade your access level.</p>
-          <form onSubmit={handleUpgrade} style={{display: 'flex', gap: '10px'}}>
+          <form onSubmit={handleUpgrade} className="upgrade-form" style={{display: 'flex', gap: '10px'}}>
             <input type="password" placeholder="Enter PIN or Password" value={accessCode} onChange={(e) => setAccessCode(e.target.value)} required/>
             <button type="submit" className="secondary-button" disabled={upgrading}>{upgrading ? 'Upgrading...' : 'Upgrade'}</button>
           </form>
